@@ -2,149 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <meta name="description" content="AXIVM — Deploy one AI agent. Free 14-day pilot." />
   <meta property="og:title" content="AXIVM — Deploy one AI agent. Free 14-day pilot." />
-  <meta property="og:description" content="AXIVM turns manual processes into autonomous systems you own. Measurable ROI in days." />
+  <meta property="og:description" content="AXIVM turns manual processes into autonomous systems you own—secure, auditable, measurable." />
   <meta property="og:type" content="website" />
   <title>AXIVM — Deploy one AI agent. Free 14-day pilot.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="preload" href="styles.css" as="style" />
   <link rel="stylesheet" href="styles.css" />
-
 </head>
 <body>
-  <!-- Premium AI Agent Map Background -->
-  <canvas id="bg" aria-hidden="true"></canvas>
-  
-  <!-- Subtle noise overlay -->
-  <div class="noise-overlay" aria-hidden="true"></div>
+  <main class="site">
+    <!-- Background animation -->
+    <div class="bg-wrap" aria-hidden="true">
+      <svg class="mb-svg" viewBox="0 0 800 560" role="img" aria-label="AXIVM connecting your apps like a motherboard">
+        <defs>
+          <!-- PCB grid -->
+          <pattern id="iso-grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="skewY(-30)">
+            <path d="M0 0 L40 0 M0 0 L0 40" class="grid-stroke" />
+          </pattern>
 
-  <header class="site-header">
-    <a href="#" class="brand" aria-label="AXIVM Home">
-      <span class="brand-mark" aria-hidden="true">◎</span>
-      <span class="brand-word">AXIVM</span>
-      <span class="brand-sub">Automations</span>
-    </a>
-    <nav class="site-nav">
-      <a href="#features">Features</a>
-      <a href="#how" class="ghost">How it works</a>
-      <a href="#audit" class="cta small">Book Free Audit</a>
-    </nav>
-  </header>
+          <!-- soft glow via blur+merge would be heavier; use CSS drop-shadow instead -->
+          <linearGradient id="trace-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="var(--trace-aqua)" />
+            <stop offset="50%" stop-color="var(--trace-pink)" />
+            <stop offset="100%" stop-color="var(--trace-cyan)" />
+          </linearGradient>
+        </defs>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero" id="hero">
-      <div class="hero-inner" id="tiltTarget">
-        <h1 class="headline">
-          <span class="accent">Deploy one AI agent.</span><br>
-          <span class="accent-secondary">Free 14-day pilot.</span>
-        </h1>
-        <p class="subhead">
-          AXIVM turns manual processes into autonomous systems you own. Measurable ROI in days.
-        </p>
-        
-        <div class="trust-line">
-          <span class="trust-icon">✓</span>
-          <span class="trust-text">Trusted by enterprise & security-first teams.</span>
-        </div>
+        <!-- Motherboard base -->
+        <rect x="0" y="0" width="800" height="560" fill="url(#iso-grid)"></rect>
 
-        <div class="cta-row">
-          <a id="bookAuditTop" href="#audit" class="cta primary">Book Free Audit</a>
-          <a id="seeHowTop" href="#how" class="cta secondary">See How It Works</a>
-        </div>
+        <!-- Random pads for texture -->
+        <g id="pads"></g>
 
-        <ul class="trust-bullets" role="list" aria-label="Key assurances">
-          <li>Zero Setup Time</li>
-          <li>Enterprise Security</li>
-          <li>Proven ROI</li>
-          <li>24/7 Support</li>
-        </ul>
-      </div>
-      <div class="scroll-indicator">
-        <div class="scroll-arrow"></div>
+        <!-- Nodes (chips) -->
+        <g id="nodes">
+          <g class="chip" data-id="cpu" transform="translate(400,260)">
+            <rect x="-44" y="-28" width="88" height="56" rx="10" class="chip-body"></rect>
+            <text x="0" y="4" class="chip-label">AXIVM</text>
+            <!-- CPU fins/pins -->
+            <g class="chip-pins chip-pins-top">
+              <!-- pins added by JS for symmetry -->
+            </g>
+            <g class="chip-pins chip-pins-bottom"></g>
+          </g>
+
+          <g class="chip" data-id="slack" transform="translate(160,120)">
+            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
+            <text x="0" y="4" class="chip-label">Slack</text>
+          </g>
+
+          <g class="chip" data-id="gmail" transform="translate(660,120)">
+            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
+            <text x="0" y="4" class="chip-label">Gmail</text>
+          </g>
+
+          <g class="chip" data-id="notion" transform="translate(140,420)">
+            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
+            <text x="0" y="4" class="chip-label">Notion</text>
+          </g>
+
+          <g class="chip" data-id="teams" transform="translate(660,420)">
+            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
+            <text x="0" y="4" class="chip-label">Teams</text>
+          </g>
+        </g>
+
+        <!-- Edges (traces). JS computes path 'd' from node positions. -->
+        <g id="traces">
+          <!-- Define logical edges only; JS draws geometry -->
+          <path class="trace" data-from="cpu" data-to="slack" data-color="var(--trace-aqua)"></path>
+          <path class="trace" data-from="cpu" data-to="gmail" data-color="var(--trace-pink)"></path>
+          <path class="trace" data-from="cpu" data-to="notion" data-color="var(--trace-violet)"></path>
+          <path class="trace" data-from="cpu" data-to="teams" data-color="var(--trace-cyan)"></path>
+          <!-- cross-links / mesh flavor -->
+          <path class="trace" data-from="slack" data-to="gmail" data-color="var(--trace-aqua)"></path>
+          <path class="trace" data-from="notion" data-to="teams" data-color="var(--trace-pink)"></path>
+        </g>
+      </svg>
+      <!-- vignette to keep hero text readable -->
+      <div class="vignette"></div>
+    </div>
+
+    <!-- Foreground content -->
+    <section id="hero" class="hero">
+      <h1 class="headline">
+        <span class="line-1">Deploy one AI agent.</span>
+        <span class="line-2 accent">Free 14-day pilot.</span>
+      </h1>
+      <p class="sub">
+        AXIVM turns manual processes into autonomous systems you own—secure, auditable, measurable.
+      </p>
+      
+      <div class="trust-pill">✓ Trusted by security-first teams.</div>
+
+      <div class="cta">
+        <a class="btn primary" href="#contact">Book Free Audit</a>
+        <a class="btn ghost" href="#how" id="see-how">See How It Works</a>
       </div>
     </section>
 
-    <!-- LOGO STRIP -->
-    <section class="logos" aria-label="Trusted by">
-      <ul class="logo-row" role="list">
-        <li>Logo A</li>
-        <li>Logo B</li>
-        <li>Logo C</li>
-        <li>Logo D</li>
-        <li>Logo E</li>
-      </ul>
-    </section>
+    <!-- WHAT WE DO -->
+    <section id="what" class="section">
+      <h2>We put an agent between your tools.</h2>
+      <p class="lead">Connect → Consolidate → Act → Prove.</p>
 
-    <!-- FEATURES -->
-    <section id="features" class="section">
-      <header class="section-head">
-        <h2>Why teams start with one agent</h2>
-        <p>Fast validation, low risk, and results that compound.</p>
-      </header>
-
-      <div class="features-grid">
-        <article class="feature">
-          <h3>Zero Setup Time</h3>
-          <p>We integrate with what you already use. No rip‑and‑replace, no learning curve, no blockers.</p>
+      <div class="features">
+        <article class="card">
+          <h3>Connect</h3>
+          <p>Slack, Gmail, Notion, Teams, Sheets, webhooks, and more.</p>
         </article>
-        <article class="feature">
-          <h3>Enterprise Security</h3>
-          <p>Least‑privilege access, auditable actions, on‑prem or private cloud. Built with a paranoid threat model.</p>
+        <article class="card">
+          <h3>Consolidate</h3>
+          <p>Normalize events into a clean, queryable stream for your org.</p>
         </article>
-        <article class="feature">
-          <h3>Proven ROI</h3>
-          <p>We define a single measurable workflow and ship wins in days. If it doesn't move the needle, you don't expand.</p>
+        <article class="card">
+          <h3>Act</h3>
+          <p>Draft replies, route tasks, update records, and notify stakeholders.</p>
         </article>
-      </div>
-
-      <div class="section-cta">
-        <a href="#audit" class="cta">Book Free Audit</a>
-        <a href="#how" class="cta secondary">See How It Works</a>
+        <article class="card">
+          <h3>Prove it</h3>
+          <p>SOC-ready audit logs, human approvals, and full rollbacks.</p>
+        </article>
       </div>
     </section>
 
     <!-- HOW IT WORKS -->
-    <section id="how" class="section">
-      <header class="section-head">
-        <h2>How it works</h2>
-        <p>Four steps. Two meetings. One agent in production.</p>
-      </header>
-      <ol class="how-steps">
-        <li><strong>Audit (30 min):</strong> We map one high‑impact workflow.</li>
-        <li><strong>Sandbox:</strong> We connect read‑only and simulate actions.</li>
-        <li><strong>Pilot (14 days):</strong> Guardrailed, measurable, reversible.</li>
-        <li><strong>Scale:</strong> Expand tasks, add agents, or keep it lean.</li>
+    <section id="how" class="section steps">
+      <h2>How it works</h2>
+      <ol class="step-list">
+        <li><strong>Discover.</strong> A setup wizard maps pains and goals.</li>
+        <li><strong>Connect.</strong> OAuth/API with least-privilege scopes.</li>
+        <li><strong>Orchestrate.</strong> Start from a template (n8n under the hood) and tweak rules.</li>
+        <li><strong>Observe.</strong> Watch runs, approve actions, iterate with audit logs.</li>
       </ol>
+
+      <div class="cta row">
+        <a class="btn primary" href="#contact">Start Free Pilot</a>
+        <a class="btn ghost" href="#what">See What We Do</a>
+      </div>
     </section>
 
-    <!-- AUDIT / CONTACT -->
-    <section id="audit" class="section audit">
-      <header class="section-head">
-        <h2>Book your free audit</h2>
-        <p>No obligations. We'll identify a 14‑day pilot with measurable ROI.</p>
-      </header>
-      <div class="audit-actions">
-        <a class="cta" href="mailto:hello@axivm.io?subject=Free%20Audit%20Request%20—%20AXIVM%20Automations">Email Us</a>
-        <a class="cta secondary" href="https://cal.com/" target="_blank" rel="noopener">Schedule Call</a>
-      </div>
-      <p class="micro">Prefer chat? Add a link/button here to your Matrix/IRC/Telegram.</p>
-    </section>
+    <!-- Extra scroll space to showcase progressive lighting -->
+    <section class="spacer"></section>
   </main>
 
-  <footer class="site-footer">
-    <small>© <span id="year"></span> AXIVM. All rights reserved.</small>
-  </footer>
-
-  <noscript>
-    <div class="noscript">This site works best with JavaScript enabled.</div>
-  </noscript>
-
-  <script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
