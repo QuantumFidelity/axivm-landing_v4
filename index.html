@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="AXIVM Automations — Deploy one AI agent. Free 14-day pilot." />
+  <meta property="og:title" content="AXIVM Automations" />
+  <meta property="og:description" content="Deploy one AI agent. Free 14-day pilot." />
+  <meta property="og:type" content="website" />
+  <title>AXIVM Automations</title>
+  <link rel="preload" href="styles.css" as="style" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- GPU-friendly background -->
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a href="#" class="brand" aria-label="AXIVM Home">
+      <span class="brand-mark" aria-hidden="true">◎</span>
+      <span class="brand-word">AXIVM</span>
+      <span class="brand-sub">Automations</span>
+    </a>
+    <nav class="site-nav">
+      <a href="#features">Features</a>
+      <a href="#how" class="ghost">How it works</a>
+      <a href="#audit" class="cta small">Book Free Audit</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-inner" id="tiltTarget">
+        <h1 class="headline">
+          <span class="accent">Deploy one AI agent.</span><br />
+          Free 14‑day pilot.
+        </h1>
+        <p class="subhead">
+          Zero setup. Enterprise‑grade security. Measurable ROI from week one.
+        </p>
+
+        <div class="cta-row">
+          <a id="bookAuditTop" href="#audit" class="cta">Book Free Audit</a>
+          <a id="seeHowTop" href="#how" class="cta secondary">See How It Works</a>
+        </div>
+
+        <ul class="trust-bullets" role="list" aria-label="Key assurances">
+          <li>Zero Setup Time</li>
+          <li>Enterprise Security</li>
+          <li>Proven ROI</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <header class="section-head">
+        <h2>Why teams start with one agent</h2>
+        <p>Fast validation, low risk, and results that compound.</p>
+      </header>
+
+      <div class="features-grid">
+        <article class="feature">
+          <h3>Zero Setup Time</h3>
+          <p>We integrate with what you already use. No rip‑and‑replace, no learning curve, no blockers.</p>
+        </article>
+        <article class="feature">
+          <h3>Enterprise Security</h3>
+          <p>Least‑privilege access, auditable actions, on‑prem or private cloud. Built with a paranoid threat model.</p>
+        </article>
+        <article class="feature">
+          <h3>Proven ROI</h3>
+          <p>We define a single measurable workflow and ship wins in days. If it doesn't move the needle, you don't expand.</p>
+        </article>
+      </div>
+
+      <div class="section-cta">
+        <a href="#audit" class="cta">Book Free Audit</a>
+        <a href="#how" class="cta secondary">See How It Works</a>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section">
+      <header class="section-head">
+        <h2>How it works</h2>
+        <p>Four steps. Two meetings. One agent in production.</p>
+      </header>
+      <ol class="how-steps">
+        <li><strong>Audit (30 min):</strong> We map one high‑impact workflow.</li>
+        <li><strong>Sandbox:</strong> We connect read‑only and simulate actions.</li>
+        <li><strong>Pilot (14 days):</strong> Guardrailed, measurable, reversible.</li>
+        <li><strong>Scale:</strong> Expand tasks, add agents, or keep it lean.</li>
+      </ol>
+    </section>
+
+    <!-- AUDIT / CONTACT -->
+    <section id="audit" class="section audit">
+      <header class="section-head">
+        <h2>Book your free audit</h2>
+        <p>No obligations. We'll identify a 14‑day pilot with measurable ROI.</p>
+      </header>
+      <div class="audit-actions">
+        <a class="cta" href="mailto:hello@axivm.io?subject=Free%20Audit%20Request%20—%20AXIVM%20Automations">Email Us</a>
+        <a class="cta secondary" href="https://cal.com/" target="_blank" rel="noopener">Schedule Call</a>
+      </div>
+      <p class="micro">Prefer chat? Add a link/button here to your Matrix/IRC/Telegram.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>© <span id="year"></span> AXIVM. All rights reserved.</small>
+  </footer>
+
+  <noscript>
+    <div class="noscript">This site works best with JavaScript enabled.</div>
+  </noscript>
+
+  <script defer src="script.js"></script>
+</body>
+</html>
