@@ -193,6 +193,106 @@
   if (seeHow) seeHow.addEventListener('click', () => smoothTo('#how'));
 })();
 
+// Add shadow + bevel clones for each trace
+(() => {
+  const svg = document.querySelector('.mb-svg'); if(!svg) return;
+  const traces = Array.from(svg.querySelectorAll('.trace'));
+  traces.forEach(p => {
+    // Shadow clone (under)
+    const shadow = p.cloneNode();
+    shadow.removeAttribute('id');
+    shadow.setAttribute('stroke', 'black');
+    shadow.setAttribute('stroke-opacity', '0.22');
+    shadow.setAttribute('stroke-width', String((parseFloat(p.getAttribute('stroke-width')||'3')) + 1.5));
+    shadow.setAttribute('filter', 'url(#trace-ao)');
+    p.parentNode.insertBefore(shadow, p);
+
+    // Bevel highlight (over)
+    const bevel = p.cloneNode();
+    bevel.removeAttribute('id');
+    bevel.setAttribute('stroke', 'url(#trace-bevel)');
+    bevel.setAttribute('stroke-width', '1');
+    bevel.setAttribute('opacity', '0.25');
+    p.parentNode.insertBefore(bevel, p.nextSibling);
+  });
+})();
+
+// Reduced motion?
+const AX_RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Magnetic button hover */
+(() => {
+  if (AX_RM) return;
+  const btn = document.querySelector('.btn.primary.magnet');
+  if(!btn) return;
+  const strength = 10; // px
+  let raf = null, tx = 0, ty = 0, cx = 0, cy = 0;
+
+  function onMove(e){
+    const r = btn.getBoundingClientRect();
+    cx = ((e.clientX - r.left) / r.width - 0.5) * strength;
+    cy = ((e.clientY - r.top) / r.height - 0.5) * strength;
+    if(!raf) raf = requestAnimationFrame(apply);
+  }
+  function onLeave(){
+    cx = cy = 0;
+    if(!raf) raf = requestAnimationFrame(apply);
+  }
+  function apply(){
+    raf = null;
+    tx += (cx - tx) * 0.18;
+    ty += (cy - ty) * 0.18;
+    btn.style.transform = `translate(${tx}px, ${ty}px)`;
+  }
+  btn.addEventListener('mousemove', onMove, {passive:true});
+  btn.addEventListener('mouseleave', onLeave);
+})();
+
+/* Trace glints: quick spark that rides a short segment of a random trace */
+(() => {
+  if (AX_RM) return;
+  const svg = document.querySelector('.mb-svg'); if(!svg) return;
+  const traces = Array.from(svg.querySelectorAll('.trace'));
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function spawnGlint(){
+    if (!traces.length) return;
+    const path = traces[Math.floor(Math.random()*traces.length)];
+    const len  = path.getTotalLength();
+    const start = Math.random() * (len * 0.8);
+    const dur = 450 + Math.random()*300;
+
+    const g = document.createElementNS(NS,'g');
+    g.setAttribute('opacity','0');
+    const flare = document.createElementNS(NS,'circle');
+    flare.setAttribute('r','2.8');
+    flare.setAttribute('fill', getComputedStyle(path).stroke || '#19ffd1');
+    const halo = document.createElementNS(NS,'circle');
+    halo.setAttribute('r','6');
+    halo.setAttribute('fill', 'white');
+    halo.setAttribute('opacity','.25');
+    g.appendChild(halo); g.appendChild(flare);
+    svg.appendChild(g);
+
+    let t0 = null;
+    function step(ts){
+      if(!t0) t0 = ts;
+      const p = (ts - t0) / dur;
+      if (p >= 1){ svg.removeChild(g); return; }
+      const d = start + p * (len * 0.12);
+      const pt = path.getPointAtLength(Math.min(len, d));
+      g.setAttribute('transform', `translate(${pt.x}, ${pt.y})`);
+      g.setAttribute('opacity', String(p < 0.1 ? p*10 : 1 - (p-0.1)));
+      halo.setAttribute('r', String(6 + p*4));
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // one glint every ~700–1200ms
+  setInterval(spawnGlint, 700 + Math.random()*500);
+})();
+
 // Respect user motion preference
 const AX_PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -264,145 +364,170 @@ const AX_PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)')
   onScroll();
 })();
 
-/* === CPU Glass Cover + Component Decals === */
+/* ===== Data Ribbons Canvas ===== */
 (function(){
-  const svg = document.querySelector('.mb-svg');
-  if(!svg) return;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const NS = 'http://www.w3.org/2000/svg';
+  const canvas = document.getElementById('ribbons');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha:true });
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- CPU GLASS COVER (over the chip, under icons) ---------- */
-  const cpuGroup = svg.querySelector('[data-id="cpu"]');
-  const cpuRect  = cpuGroup ? cpuGroup.querySelector('rect') : null; // main chip body
-  if(cpuGroup && cpuRect){
-    // CPU center from its group translate
-    const m = (cpuGroup.getAttribute('transform')||'').match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
-    const cx = m ? parseFloat(m[1]) : 0;
-    const cy = m ? parseFloat(m[2]) : 0;
+  function resize(){
+    const {clientWidth:w, clientHeight:h} = canvas;
+    canvas.width = Math.floor(w * DPR);
+    canvas.height = Math.floor(h * DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 
-    // Glass slightly larger than chip (original chip ~88x56)
-    const w = 96, h = 64, r = 14;
+  // Enhanced ribbons: rich, wide, and dynamic
+  const COLORS = ['#19ffd1','#ff2e63','#00c2ff','#8a7dff','#ff6b35','#00d98b'];
+  const ribbons = COLORS.map((c,i) => ({
+    hue: c,
+    amp: 25 + i*8,
+    speed: 0.8 + i*0.15,
+    width: 6.0 + (i%3)*2.5,
+    offset: Math.random()*2000,
+    phase: Math.random() * Math.PI * 2,
+    amplitude: 0.8 + Math.random() * 0.4,
+  }));
 
-    // Create layer and insert above traces, below decals/icons
-    let decals = svg.querySelector('#decals');
-    if(!decals){ decals = document.createElementNS(NS,'g'); decals.setAttribute('id','decals'); svg.appendChild(decals); }
-    const glassLayer = document.createElementNS(NS,'g');
-    glassLayer.setAttribute('id','cpuGlass');
-    glassLayer.setAttribute('transform', `translate(${cx},${cy})`);
-
-    const sh = document.createElementNS(NS,'rect'); // occlusion shadow
-    sh.setAttribute('x', -w/2); sh.setAttribute('y', -h/2+4);
-    sh.setAttribute('width', w); sh.setAttribute('height', h);
-    sh.setAttribute('rx', r); sh.setAttribute('class','comp-shadow');
-    sh.setAttribute('opacity','.35');
-    glassLayer.appendChild(sh);
-
-    const glass = document.createElementNS(NS,'rect');
-    glass.setAttribute('x', -w/2); glass.setAttribute('y', -h/2);
-    glass.setAttribute('width', w); glass.setAttribute('height', h);
-    glass.setAttribute('rx', r); glass.setAttribute('class','cpu-glass');
-    glassLayer.appendChild(glass);
-
-    const bezel = document.createElementNS(NS,'rect');
-    bezel.setAttribute('x', -w/2+6); bezel.setAttribute('y', -h/2+6);
-    bezel.setAttribute('width', w-12); bezel.setAttribute('height', h-12);
-    bezel.setAttribute('rx', r-6); bezel.setAttribute('class','cpu-glass-bezel');
-    glassLayer.appendChild(bezel);
-
-    const glare = document.createElementNS(NS,'rect'); // moving glare
-    glare.setAttribute('x', -w); glare.setAttribute('y', -h/2);
-    glare.setAttribute('width', w*0.9); glare.setAttribute('height', h);
-    glare.setAttribute('transform', 'rotate(-18)');
-    glare.setAttribute('class','cpu-glare');
-    glassLayer.appendChild(glare);
-
-    // Insert before decals so decals (and icons) sit above glass
-    svg.insertBefore(glassLayer, decals);
-
-    if(!reduce){
-      let t0=null;
-      function tick(ts){
-        if(t0==null) t0=ts;
-        const tsec = (ts - t0)/1000;
-        const x = -w + ((tsec*20) % (w*2.2)); // ~20px/s loop
-        glare.setAttribute('x', x);
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
+  function pathAt(t, idx){
+    // Enhanced path generation for top-of-hero positioning
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+    
+    // Position ribbons at the top of the hero area
+    const ribbonHeight = H * 0.4; // Top 40% of screen
+    const y0 = ribbonHeight * 0.3 + Math.sin(t * 0.3 + ribbons[idx].phase) * ribbons[idx].amplitude * 20;
+    const y3 = ribbonHeight * 0.7 + Math.sin(t * 0.4 + ribbons[idx].phase + 1) * ribbons[idx].amplitude * 15;
+    
+    // Wider horizontal spread
+    const x0 = -0.2*W + Math.sin(t * 0.2 + idx) * 30;
+    const x3 =  1.2*W + Math.sin(t * 0.25 + idx + 2) * 25;
+    
+    // Dynamic control points with more organic movement
+    const p = (u, seed) => Math.sin(u*0.8 + seed)*1.5 + Math.sin(u*0.23 + seed*1.7)*0.8 + Math.sin(u*0.12 + seed*0.5)*0.4;
+    const n1 = p(t, 1.3+idx), n2 = p(t, 2.7+idx);
+    
+    const x1 = W*0.2 + n1*40, y1 = ribbonHeight * 0.4 + n1*35;
+    const x2 = W*0.8 + n2*35, y2 = ribbonHeight * 0.6 + n2*30;
+    
+    return { x0,y0,x1,y1,x2,y2,x3,y3 };
   }
 
-  /* ---------- COMPONENT DECALS (realism) ---------- */
-  const decals = svg.querySelector('#decals');
-  if(!decals) return;
-
-  // Helpers
-  function make(tag, attrs){ const el = document.createElementNS(NS, tag); for(const k in attrs) el.setAttribute(k, attrs[k]); return el; }
-
-  // Vias (sprinkle some if '#pads' exists to blend with texture)
-  const pads = svg.getElementById('pads');
-  if(pads){
-    for(let i=0;i<30;i++){
-      const x = 80 + i*22 + (i%3)*6;
-      const y = 80 + (i%10)*28;
-      const c = make('circle',{cx:x, cy:y, r:2.2, class:'via'});
-      pads.appendChild(c);
-    }
-  }
-
-  // Mounting holes (corners)
-  [['46','46'], ['754','46'], ['46','514'], ['754','514']]
-    .forEach(([x,y]) => decals.appendChild(make('circle',{ cx:x, cy:y, r:8, class:'mount-hole' })));
-
-  // Fiducials (alignment markers)
-  decals.appendChild(make('circle',{ cx:120, cy:80,  r:2.2, class:'fiducial' }));
-  decals.appendChild(make('circle',{ cx:700, cy:480, r:2.2, class:'fiducial' }));
-
-  // Test pads
-  [ [260,150], [300,170], [520,150], [560,170], [260,440], [540,430] ]
-    .forEach(([x,y]) => decals.appendChild(make('circle',{ cx:x, cy:y, r:1.8, class:'testpad' })));
-
-  // SMD components (resistors/caps) aligned to traces
-  function placeSMDResistor(x,y,angle,label){
-    const g = make('g', { transform:`translate(${x},${y}) rotate(${angle})` });
-    g.appendChild(make('ellipse', { class:'comp-shadow', cx:'0', cy:'4', rx:'9', ry:'3', opacity:'.35' }));
-    g.appendChild(make('rect',{ class:'smd-pad',  x:-14, y:-4, width:6, height:8, rx:1.5 }));
-    g.appendChild(make('rect',{ class:'smd-pad',  x:8,  y:-4, width:6, height:8, rx:1.5 }));
-    g.appendChild(make('rect',{ class:'smd-body', x:-8,  y:-6, width:16, height:12, rx:2 }));
-    [-4.5,-1.5,1.5,4.5].forEach(sx => g.appendChild(make('rect',{ x:sx, y:-6, width:1.6, height:12, fill:'#2b3136', opacity:.65 })));
-    if(label){ const t=make('text',{ class:'silk', x:'0', y:'-10', 'text-anchor':'middle' }); t.textContent=label; g.appendChild(t); }
-    decals.appendChild(g);
-  }
-  function placeSMDCapacitor(x,y,angle,label){
-    const g = make('g', { transform:`translate(${x},${y}) rotate(${angle})` });
-    g.appendChild(make('ellipse', { class:'comp-shadow', cx:'0', cy:'4', rx:'8', ry:'3', opacity:'.35' }));
-    g.appendChild(make('rect',{ class:'smd-pad', x:-12, y:-4, width:5, height:8, rx:1 }));
-    g.appendChild(make('rect',{ class:'smd-pad', x:7,  y:-4, width:5, height:8, rx:1 }));
-    g.appendChild(make('rect',{ class:'smd-body', x:-7, y:-6, width:14, height:12, rx:2 }));
-    g.appendChild(make('rect',{ x:-1, y:-6, width:2, height:12, fill:'#2b3136', opacity:.7 })); // center mark
-    if(label){ const t=make('text',{ class:'silk', x:'0', y:'-10', 'text-anchor':'middle' }); t.textContent=label; g.appendChild(t); }
-    decals.appendChild(g);
-  }
-
-  const traces = Array.from(svg.querySelectorAll('.trace')).slice(0, 6); // limit for cleanliness
-  let rIndex=1, cIndex=1;
-  traces.forEach((path, i) => {
-    const len = path.getTotalLength();
-    [0.28, 0.56].forEach((f, j) => {
-      const d = f*len;
-      const p1 = path.getPointAtLength(Math.max(0, d-0.1));
-      const p2 = path.getPointAtLength(Math.min(len, d+0.1));
-      const angle = Math.atan2(p2.y-p1.y, p2.x-p1.x) * 180/Math.PI;
-
-      // normal offset so parts don't sit on top of the trace
-      const nx = -(p2.y-p1.y), ny = (p2.x-p1.x);
-      const nlen = Math.hypot(nx,ny) || 1;
-      const off = 10 + (j*2);
-      const x = p1.x + (nx/nlen)*off;
-      const y = p1.y + (ny/nlen)*off;
-
-      if((i+j)%2===0){ placeSMDResistor(x,y, angle, `R${rIndex++}`); }
-      else            { placeSMDCapacitor(x,y, angle, `C${cIndex++}`); }
+  let raf=null, lastTs=0;
+  
+  // Particle system
+  const particles = [];
+  for(let i = 0; i < 15; i++) {
+    particles.push({
+      x: Math.random() * canvas.clientWidth,
+      y: Math.random() * canvas.clientHeight * 0.4,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 4 + 1.5,
+      color: ['#19ffd1','#ff2e63','#00c2ff','#8a7dff','#ff6b35','#00d98b'][Math.floor(Math.random() * 6)],
+      opacity: Math.random() * 0.4 + 0.15,
+      phase: Math.random() * Math.PI * 2,
+      pulse: Math.random() * 0.1 + 0.05
     });
-  });
+  }
+  
+  function updateParticles(dt) {
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.phase += p.pulse;
+      
+      // Bounce off edges with some randomness
+      if(p.x < 0 || p.x > canvas.clientWidth) {
+        p.vx *= -1;
+        p.vx += (Math.random() - 0.5) * 0.2;
+      }
+      if(p.y < 0 || p.y > canvas.clientHeight * 0.4) {
+        p.vy *= -1;
+        p.vy += (Math.random() - 0.5) * 0.2;
+      }
+      
+      // Keep in bounds
+      p.x = Math.max(0, Math.min(canvas.clientWidth, p.x));
+      p.y = Math.max(0, Math.min(canvas.clientHeight * 0.4, p.y));
+    });
+  }
+  
+  function drawParticles() {
+    particles.forEach(p => {
+      ctx.save();
+      const pulseOpacity = p.opacity + Math.sin(p.phase) * 0.15;
+      ctx.globalAlpha = pulseOpacity;
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+  
+  function tick(ts){
+    if(prefersReduced){ // static gradient fallback
+      ctx.clearRect(0,0,canvas.clientWidth, canvas.clientHeight);
+      const g = ctx.createLinearGradient(0,0,canvas.clientWidth,0);
+      g.addColorStop(0, 'rgba(25,255,209,.25)');
+      g.addColorStop(0.5, 'rgba(255,46,99,.25)');
+      g.addColorStop(1, 'rgba(0,217,139,.25)');
+      ctx.fillStyle = g; ctx.fillRect(0,0,canvas.clientWidth, canvas.clientHeight * 0.4);
+      return;
+    }
+    if(!lastTs) lastTs = ts;
+    const dt = Math.min(33, ts - lastTs)/1000; lastTs = ts;
+
+    ctx.clearRect(0,0,canvas.clientWidth, canvas.clientHeight);
+    ctx.globalCompositeOperation = 'lighter';
+
+    ribbons.forEach((r, idx) => {
+      r.offset += dt * r.speed;
+      const {x0,y0,x1,y1,x2,y2,x3,y3} = pathAt(r.offset, idx);
+
+      // Enhanced rendering with multiple layers for richness
+      for(let k=0;k<5;k++){
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + Math.sin(r.offset*2 + k)*2.5);
+        ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+        ctx.strokeStyle = r.hue;
+        ctx.lineWidth = r.width - k*1.2;
+        ctx.globalAlpha = 0.15 - k*0.025;
+        ctx.stroke();
+      }
+      
+      // Add subtle glow effect
+      ctx.shadowColor = r.hue;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+      ctx.strokeStyle = r.hue;
+      ctx.lineWidth = r.width * 0.3;
+      ctx.globalAlpha = 0.08;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    });
+
+    // Update and draw particles
+    updateParticles(dt);
+    drawParticles();
+
+    ctx.globalCompositeOperation = 'source-over';
+    raf = requestAnimationFrame(tick);
+  }
+  if(!prefersReduced){
+    const vis = () => document.hidden ? cancelAnimationFrame(raf) : (raf=requestAnimationFrame(tick));
+    document.addEventListener('visibilitychange', vis);
+    raf = requestAnimationFrame(tick);
+  }else{
+    tick(0);
+  }
 })();
+
+

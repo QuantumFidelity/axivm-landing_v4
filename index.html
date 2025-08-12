@@ -18,139 +18,39 @@
   <main class="site">
     <!-- Background animation -->
     <div class="bg-wrap" aria-hidden="true">
-      <svg class="mb-svg iso" viewBox="0 0 800 560" role="img" aria-label="AXIVM connecting your apps like a motherboard">
-        <defs>
-          <!-- PCB grid -->
-          <pattern id="iso-grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="skewY(-30)">
-            <path d="M0 0 L40 0 M0 0 L0 40" class="grid-stroke" />
-          </pattern>
-
-          <!-- soft glow via blur+merge would be heavier; use CSS drop-shadow instead -->
-          <linearGradient id="trace-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="var(--trace-aqua)" />
-            <stop offset="50%" stop-color="var(--trace-pink)" />
-            <stop offset="100%" stop-color="var(--trace-cyan)" />
-          </linearGradient>
-
-          <!-- Inner glow for glass edge -->
-          <filter id="inner-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/>
-            <feOffset dx="0" dy="0" result="o"/>
-            <feComposite in="o" in2="b" operator="arithmetic" k2="-1" k3="1" result="inner"/>
-            <feColorMatrix in="inner" type="matrix"
-              values="0 0 0 0 1
-                      0 0 0 0 1
-                      0 0 0 0 1
-                      0 0 0 .35 0" result="g"/>
-            <feMerge>
-              <feMergeNode in="g"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-
-          <!-- Beveled stroke for glass -->
-          <linearGradient id="glass-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"  stop-color="rgba(255,255,255,.55)"/>
-            <stop offset="50%" stop-color="rgba(255,255,255,.18)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,.45)"/>
-          </linearGradient>
-
-          <!-- Moving glare bar -->
-          <linearGradient id="glare-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
-            <stop offset="30%" stop-color="rgba(255,255,255,.35)"/>
-            <stop offset="70%" stop-color="rgba(255,255,255,.08)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-          </linearGradient>
-
-          <!-- Soft blur for shadows -->
-          <filter id="blur-6"><feGaussianBlur stdDeviation="6"/></filter>
-
-          <!-- Via gradient (if not present) -->
-          <radialGradient id="via-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#0a1416"/>
-            <stop offset="55%" stop-color="#1b2e31"/>
-            <stop offset="100%" stop-color="#071013"/>
-          </radialGradient>
-        </defs>
-
-        <!-- Motherboard base -->
-        <rect x="0" y="0" width="800" height="560" fill="url(#iso-grid)"></rect>
-
-        <!-- Random pads for texture -->
-        <g id="pads"></g>
-
-        <!-- Nodes (chips) -->
-        <g id="nodes">
-          <g class="chip" data-id="cpu" transform="translate(400,260)">
-            <rect x="-44" y="-28" width="88" height="56" rx="10" class="chip-body"></rect>
-            <text x="0" y="4" class="chip-label">AXIVM</text>
-            <!-- CPU fins/pins -->
-            <g class="chip-pins chip-pins-top">
-              <!-- pins added by JS for symmetry -->
-            </g>
-            <g class="chip-pins chip-pins-bottom"></g>
-          </g>
-
-          <g class="chip" data-id="slack" transform="translate(160,120)">
-            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
-            <text x="0" y="4" class="chip-label">Slack</text>
-          </g>
-
-          <g class="chip" data-id="gmail" transform="translate(660,120)">
-            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
-            <text x="0" y="4" class="chip-label">Gmail</text>
-          </g>
-
-          <g class="chip" data-id="notion" transform="translate(140,420)">
-            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
-            <text x="0" y="4" class="chip-label">Notion</text>
-          </g>
-
-          <g class="chip" data-id="teams" transform="translate(660,420)">
-            <rect x="-40" y="-24" width="80" height="48" rx="10" class="chip-body"></rect>
-            <text x="0" y="4" class="chip-label">Teams</text>
-          </g>
-        </g>
-
-        <!-- Edges (traces). JS computes path 'd' from node positions. -->
-        <g id="traces">
-          <!-- Define logical edges only; JS draws geometry -->
-          <path class="trace" data-from="cpu" data-to="slack" data-color="var(--trace-aqua)"></path>
-          <path class="trace" data-from="cpu" data-to="gmail" data-color="var(--trace-pink)"></path>
-          <path class="trace" data-from="cpu" data-to="notion" data-color="var(--trace-violet)"></path>
-          <path class="trace" data-from="cpu" data-to="teams" data-color="var(--trace-cyan)"></path>
-          <!-- cross-links / mesh flavor -->
-          <path class="trace" data-from="slack" data-to="gmail" data-color="var(--trace-aqua)"></path>
-          <path class="trace" data-from="notion" data-to="teams" data-color="var(--trace-pink)"></path>
-        </g>
-        <g id="decals"></g>
-      </svg>
-      <!-- vignette to keep hero text readable -->
+      <canvas id="ribbons"></canvas>
+      <div class="noise"></div>
       <div class="vignette"></div>
     </div>
 
     <!-- Foreground content -->
     <section id="hero" class="hero">
-      <h1 class="headline">
-        <span class="line-1">Deploy one AI agent.</span>
-        <span class="line-2 accent">Free 14-day pilot.</span>
-      </h1>
-      <p class="sub">
-        AXIVM connects your tools, learns your workflow, and <em>does the work</em>—secure, auditable, measurable.
-      </p>
-      
-      <div class="trust-pill">✓ Trusted by security-first teams.</div>
+      <div class="hero-inner">
+        <h1 class="headline">
+          <span class="line-1">Deploy one AI agent.</span>
+          <span class="line-2 accent">Free 14-day pilot.</span>
+        </h1>
+        <p class="sub">AXIVM connects your tools, learns your workflow, and <em>does the work</em>—secure, auditable, measurable.</p>
 
-      <div class="cta">
-        <a class="btn primary" href="#contact">Book Free Audit</a>
-        <a class="btn ghost" href="#how" id="see-how">See How It Works</a>
+        <div class="trust-pill">✓ Trusted by security-first teams.</div>
+
+        <div class="cta">
+          <a class="btn primary magnet" href="#how"><span>Start Free Pilot</span></a>
+          <a class="btn ghost" href="#contact">Book Free Audit</a>
+        </div>
+
+        <p class="guarantee">
+          <span>14-day free pilot</span> · <span>≤ 1-day setup</span> · <span>No credit card</span> · <span>Cancel anytime</span>
+        </p>
       </div>
 
-      <!-- Guarantee strip (conversion) -->
-      <p class="guarantee">
-        <span>14-day free pilot</span> · <span>≤ 1-day setup</span> · <span>No credit card</span> · <span>Cancel anytime</span>
-      </p>
+      <!-- KPI strip -->
+      <ul class="kpis" aria-hidden="false">
+        <li><strong>12,418</strong><span>events automated</span></li>
+        <li><strong>97%</strong><span>auto-resolution</span></li>
+        <li><strong>1.2h</strong><span>time saved / user / day</span></li>
+        <li><strong>SOC-ready</strong><span>audit logs</span></li>
+      </ul>
     </section>
 
     <!-- WHAT WE DO -->
