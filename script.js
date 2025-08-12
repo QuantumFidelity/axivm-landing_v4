@@ -364,170 +364,127 @@ const AX_PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)')
   onScroll();
 })();
 
-/* ===== Data Ribbons Canvas ===== */
+/* Sticky nav elevation + mobile toggle */
+(() => {
+  const nav = document.querySelector('.topnav');
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+  if (!nav) return;
+  const onScroll = () => (window.scrollY > 6) ? nav.classList.add('scrolled') : nav.classList.remove('scrolled');
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  if (toggle && links){
+    toggle.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.addEventListener('click', () => { nav.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); });
+  }
+})();
+
+/* Premium Glossy Data Ribbons v2 (parallax + scroll energy + streaks) */
 (function(){
   const canvas = document.getElementById('ribbons');
   if(!canvas) return;
   const ctx = canvas.getContext('2d', { alpha:true });
   const DPR = Math.min(2, window.devicePixelRatio || 1);
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function resize(){
-    const {clientWidth:w, clientHeight:h} = canvas;
-    canvas.width = Math.floor(w * DPR);
-    canvas.height = Math.floor(h * DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
+  function resize(){ const w=canvas.clientWidth,h=canvas.clientHeight; canvas.width=Math.floor(w*DPR); canvas.height=Math.floor(h*DPR); ctx.setTransform(DPR,0,0,DPR,0,0); }
+  new ResizeObserver(resize).observe(canvas); resize();
+
+  let px=0, py=0, tx=0, ty=0;
+  window.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    px=((e.clientX-r.left)/r.width - .5)*20; py=((e.clientY-r.top)/r.height - .5)*14;
+  }, {passive:true});
+
+  let energy=0; const how=document.querySelector('#how');
+  function updateEnergy(){
+    if(!how) return;
+    const h=how.getBoundingClientRect(), vh=innerHeight;
+    energy = 1 - Math.min(1, Math.max(0, (h.top - vh*.2) / (vh*.8)));
   }
-  const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
+  addEventListener('scroll', updateEnergy, {passive:true}); updateEnergy();
 
-  // Enhanced ribbons: rich, wide, and dynamic
-  const COLORS = ['#19ffd1','#ff2e63','#00c2ff','#8a7dff','#ff6b35','#00d98b'];
-  const ribbons = COLORS.map((c,i) => ({
-    hue: c,
-    amp: 25 + i*8,
-    speed: 0.8 + i*0.15,
-    width: 6.0 + (i%3)*2.5,
-    offset: Math.random()*2000,
-    phase: Math.random() * Math.PI * 2,
-    amplitude: 0.8 + Math.random() * 0.4,
-  }));
+  const RIBBONS = [
+    { hue:'#19ffd1', baseW:22, baseS:0.25, phase:Math.random()*1000, streaks:[] },
+    { hue:'#ff2e63', baseW:20, baseS:0.22, phase:Math.random()*1000, streaks:[] },
+    { hue:'#00c2ff', baseW:18, baseS:0.28, phase:Math.random()*1000, streaks:[] },
+  ];
 
-  function pathAt(t, idx){
-    // Enhanced path generation for top-of-hero positioning
-    const W = canvas.clientWidth, H = canvas.clientHeight;
-    
-    // Position ribbons at the top of the hero area
-    const ribbonHeight = H * 0.4; // Top 40% of screen
-    const y0 = ribbonHeight * 0.3 + Math.sin(t * 0.3 + ribbons[idx].phase) * ribbons[idx].amplitude * 20;
-    const y3 = ribbonHeight * 0.7 + Math.sin(t * 0.4 + ribbons[idx].phase + 1) * ribbons[idx].amplitude * 15;
-    
-    // Wider horizontal spread
-    const x0 = -0.2*W + Math.sin(t * 0.2 + idx) * 30;
-    const x3 =  1.2*W + Math.sin(t * 0.25 + idx + 2) * 25;
-    
-    // Dynamic control points with more organic movement
-    const p = (u, seed) => Math.sin(u*0.8 + seed)*1.5 + Math.sin(u*0.23 + seed*1.7)*0.8 + Math.sin(u*0.12 + seed*0.5)*0.4;
-    const n1 = p(t, 1.3+idx), n2 = p(t, 2.7+idx);
-    
-    const x1 = W*0.2 + n1*40, y1 = ribbonHeight * 0.4 + n1*35;
-    const x2 = W*0.8 + n2*35, y2 = ribbonHeight * 0.6 + n2*30;
-    
-    return { x0,y0,x1,y1,x2,y2,x3,y3 };
-  }
+  const shine = w => { const g=ctx.createLinearGradient(0,-w/2,0,w/2); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.18,'rgba(255,255,255,.25)'); g.addColorStop(.5,'rgba(255,255,255,.65)'); g.addColorStop(.82,'rgba(255,255,255,.25)'); g.addColorStop(1,'rgba(255,255,255,0)'); return g; };
+  const pathAt = (t,idx) => {
+    const W=canvas.clientWidth,H=canvas.clientHeight, ox=tx*(.15+idx*.05), oy=ty*(.10+idx*.04);
+    const x0=-.2*W+ox, y0=.55*H+oy, x3=1.2*W+ox, y3=.25*H+oy;
+    const n=(u,s)=>Math.sin(u*.6+s)*1+Math.sin(u*.18+s*1.3)*.5;
+    const x1=.25*W+ox, y1=.65*H+n(t,1.3+idx)*28+oy, x2=.65*W+ox, y2=.35*H+n(t,2.9+idx)*28+oy;
+    return {x0,y0,x1,y1,x2,y2,x3,y3};
+  };
 
-  let raf=null, lastTs=0;
-  
-  // Particle system
-  const particles = [];
-  for(let i = 0; i < 15; i++) {
-    particles.push({
-      x: Math.random() * canvas.clientWidth,
-      y: Math.random() * canvas.clientHeight * 0.4,
-      vx: (Math.random() - 0.5) * 0.8,
-      vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 4 + 1.5,
-      color: ['#19ffd1','#ff2e63','#00c2ff','#8a7dff','#ff6b35','#00d98b'][Math.floor(Math.random() * 6)],
-      opacity: Math.random() * 0.4 + 0.15,
-      phase: Math.random() * Math.PI * 2,
-      pulse: Math.random() * 0.1 + 0.05
-    });
-  }
-  
-  function updateParticles(dt) {
-    particles.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.phase += p.pulse;
-      
-      // Bounce off edges with some randomness
-      if(p.x < 0 || p.x > canvas.clientWidth) {
-        p.vx *= -1;
-        p.vx += (Math.random() - 0.5) * 0.2;
+  function spawnStreak(r){ r.streaks.push({ p: Math.random()*0.6, life:0 }); if(r.streaks.length>4) r.streaks.shift(); }
+  if(!RM) setInterval(()=>RIBBONS.forEach(spawnStreak), 900);
+
+
+  let raf=null, t0=0;
+  function tick(ts){
+    if(!t0) t0=ts;
+    const dt=Math.min(32,ts-t0)/1000; t0=ts;
+    tx += (px-tx)*.08; ty += (py-ty)*.08;
+    ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+
+    if(RM){
+      const g=ctx.createLinearGradient(0,0,canvas.clientWidth,0);
+      g.addColorStop(0,'rgba(25,255,209,.18)'); g.addColorStop(1,'rgba(255,46,99,.18)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight); return;
+    }
+
+    RIBBONS.forEach((r,i)=>{
+      const speed=r.baseS*(1+energy*.4), width=r.baseW*(1+energy*.25);
+      r.phase += dt*speed; const P=pathAt(r.phase,i);
+
+      ctx.globalCompositeOperation='lighter';
+      [1,.6,.35].forEach((a,k)=>{ ctx.beginPath(); ctx.moveTo(P.x0,P.y0); ctx.bezierCurveTo(P.x1,P.y1,P.x2,P.y2,P.x3,P.y3); ctx.strokeStyle=r.hue; ctx.lineWidth=width+k*6; ctx.globalAlpha=.08*a; ctx.stroke(); });
+
+      ctx.save(); ctx.globalCompositeOperation='screen';
+      ctx.strokeStyle=shine(width); ctx.lineWidth=width;
+      ctx.beginPath(); ctx.moveTo(P.x0,P.y0); ctx.bezierCurveTo(P.x1,P.y1,P.x2,P.y2,P.x3,P.y3); ctx.stroke(); ctx.restore();
+
+      ctx.globalCompositeOperation='lighter';
+      ctx.beginPath(); ctx.moveTo(P.x0,P.y0); ctx.bezierCurveTo(P.x1,P.y1,P.x2,P.y2,P.x3,P.y3);
+      ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1.4; ctx.stroke();
+
+      ctx.save(); ctx.globalCompositeOperation='lighter';
+      for(const s of r.streaks){
+        s.p += dt*(.18+energy*.22); s.life += dt; if(s.p>=1){ s.p=0; s.life=0; }
+        const t=s.p, x=(1-t)**3*P.x0 + 3*(1-t)**2*t*P.x1 + 3*(1-t)*t**2*P.x2 + t**3*P.x3;
+        const y=(1-t)**3*P.y0 + 3*(1-t)**2*t*P.y1 + 3*(1-t)*t**2*P.y2 + t**3*P.y3;
+        const r0=2+Math.sin(s.life*6)*.6; const g=ctx.createRadialGradient(x,y,0,x,y,r0*8);
+        g.addColorStop(0,'rgba(255,255,255,.22)'); g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r0*8,0,Math.PI*2); ctx.fill();
       }
-      if(p.y < 0 || p.y > canvas.clientHeight * 0.4) {
-        p.vy *= -1;
-        p.vy += (Math.random() - 0.5) * 0.2;
-      }
-      
-      // Keep in bounds
-      p.x = Math.max(0, Math.min(canvas.clientWidth, p.x));
-      p.y = Math.max(0, Math.min(canvas.clientHeight * 0.4, p.y));
-    });
-  }
-  
-  function drawParticles() {
-    particles.forEach(p => {
-      ctx.save();
-      const pulseOpacity = p.opacity + Math.sin(p.phase) * 0.15;
-      ctx.globalAlpha = pulseOpacity;
-      ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
       ctx.restore();
     });
+
+    raf=requestAnimationFrame(tick);
   }
-  
-  function tick(ts){
-    if(prefersReduced){ // static gradient fallback
-      ctx.clearRect(0,0,canvas.clientWidth, canvas.clientHeight);
-      const g = ctx.createLinearGradient(0,0,canvas.clientWidth,0);
-      g.addColorStop(0, 'rgba(25,255,209,.25)');
-      g.addColorStop(0.5, 'rgba(255,46,99,.25)');
-      g.addColorStop(1, 'rgba(0,217,139,.25)');
-      ctx.fillStyle = g; ctx.fillRect(0,0,canvas.clientWidth, canvas.clientHeight * 0.4);
-      return;
-    }
-    if(!lastTs) lastTs = ts;
-    const dt = Math.min(33, ts - lastTs)/1000; lastTs = ts;
 
-    ctx.clearRect(0,0,canvas.clientWidth, canvas.clientHeight);
-    ctx.globalCompositeOperation = 'lighter';
+  const vis=()=>document.hidden? cancelAnimationFrame(raf): (raf=requestAnimationFrame(tick));
+  document.addEventListener('visibilitychange',vis);
+  raf=requestAnimationFrame(tick);
+})();
 
-    ribbons.forEach((r, idx) => {
-      r.offset += dt * r.speed;
-      const {x0,y0,x1,y1,x2,y2,x3,y3} = pathAt(r.offset, idx);
-
-      // Enhanced rendering with multiple layers for richness
-      for(let k=0;k<5;k++){
-        ctx.beginPath();
-        ctx.moveTo(x0, y0 + Math.sin(r.offset*2 + k)*2.5);
-        ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
-        ctx.strokeStyle = r.hue;
-        ctx.lineWidth = r.width - k*1.2;
-        ctx.globalAlpha = 0.15 - k*0.025;
-        ctx.stroke();
-      }
-      
-      // Add subtle glow effect
-      ctx.shadowColor = r.hue;
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(x0, y0);
-      ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
-      ctx.strokeStyle = r.hue;
-      ctx.lineWidth = r.width * 0.3;
-      ctx.globalAlpha = 0.08;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    });
-
-    // Update and draw particles
-    updateParticles(dt);
-    drawParticles();
-
-    ctx.globalCompositeOperation = 'source-over';
-    raf = requestAnimationFrame(tick);
-  }
-  if(!prefersReduced){
-    const vis = () => document.hidden ? cancelAnimationFrame(raf) : (raf=requestAnimationFrame(tick));
-    document.addEventListener('visibilitychange', vis);
-    raf = requestAnimationFrame(tick);
-  }else{
-    tick(0);
-  }
+/* Magnetic CTAs (hero + nav) */
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(RM) return;
+  const btns=document.querySelectorAll('.btn.primary.magnet, .topnav .btn.primary.sm');
+  btns.forEach(btn=>{
+    const strength=10; let raf=null,tx=0,ty=0,cx=0,cy=0;
+    function onMove(e){ const r=btn.getBoundingClientRect(); cx=((e.clientX-r.left)/r.width-.5)*strength; cy=((e.clientY-r.top)/r.height-.5)*strength; if(!raf) raf=requestAnimationFrame(apply); }
+    function onLeave(){ cx=cy=0; if(!raf) raf=requestAnimationFrame(apply); }
+    function apply(){ raf=null; tx+=(cx-tx)*.18; ty+=(cy-ty)*.18; btn.style.transform=`translate(${tx}px,${ty}px)`; }
+    btn.addEventListener('mousemove',onMove,{passive:true}); btn.addEventListener('mouseleave',onLeave);
+  });
 })();
 
 

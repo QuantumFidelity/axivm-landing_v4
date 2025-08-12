@@ -15,6 +15,26 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Sticky Top Nav -->
+  <header class="topnav">
+    <div class="nav-inner">
+      <a class="brand" href="#hero">AXIVM</a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#why">Why AXIVM</a>
+        <a href="#playbooks">Playbooks</a>
+        <a href="#demo">Demo</a>
+      </nav>
+      <div class="nav-ctas">
+        <a class="btn ghost sm" href="#signin">Sign in</a>
+        <a class="btn primary sm" href="#how"><span>Start for Free</span></a>
+      </div>
+    </div>
+  </header>
+
   <main class="site">
     <!-- Background animation -->
     <div class="bg-wrap" aria-hidden="true">
@@ -23,29 +43,38 @@
       <div class="vignette"></div>
     </div>
 
-    <!-- Foreground content -->
+    <!-- HERO -->
     <section id="hero" class="hero">
-      <div class="hero-inner">
+      <div class="hero-gradient" aria-hidden="true"></div>
+
+      <div class="hero-glass">
         <h1 class="headline">
-          <span class="line-1">Deploy one AI agent.</span>
-          <span class="line-2 accent">Free 14-day pilot.</span>
+          <span class="line-1">Create. Expand. Optimize.</span>
+          <span class="line-2 accent">Start for free!</span>
         </h1>
-        <p class="sub">AXIVM connects your tools, learns your workflow, and <em>does the work</em>—secure, auditable, measurable.</p>
 
-        <div class="trust-pill">✓ Trusted by security-first teams.</div>
+        <p class="sub"><strong>With AI agents.</strong> AXIVM turns repetitive business tasks into valuable insights with intelligent, custom automation agents.</p>
 
-        <div class="cta">
-          <a class="btn primary magnet" href="#how"><span>Start Free Pilot</span></a>
+        <ul class="trust-badges">
+          <li class="badge">✓ Trusted by security-first teams</li>
+          <li class="badge gold">★ Trusted by Fortune 500</li>
+          <li class="badge">Free to use</li>
+          <li class="badge">Pay-as-you-grow</li>
+        </ul>
+
+        <div class="cta cta-centered">
+          <a class="btn primary magnet" href="#how"><span>Start for Free</span></a>
           <a class="btn ghost" href="#contact">Book Free Audit</a>
         </div>
 
         <p class="guarantee">
           <span>14-day free pilot</span> · <span>≤ 1-day setup</span> · <span>No credit card</span> · <span>Cancel anytime</span>
         </p>
+
+        <div class="hero-sweep" aria-hidden="true"></div>
       </div>
 
-      <!-- KPI strip -->
-      <ul class="kpis" aria-hidden="false">
+      <ul class="kpis">
         <li><strong>12,418</strong><span>events automated</span></li>
         <li><strong>97%</strong><span>auto-resolution</span></li>
         <li><strong>1.2h</strong><span>time saved / user / day</span></li>
@@ -55,25 +84,25 @@
 
     <!-- WHAT WE DO -->
     <section id="what" class="section">
-      <h2>We put an agent between your tools.</h2>
+      <h2>We adapt our agents to your tools to produce useful outcomes and immediate ROI.</h2>
       <p class="lead">Connect → Consolidate → Act → Prove.</p>
 
       <div class="features">
         <article class="card">
-          <h3>Connect</h3>
-          <p>Slack, Gmail, Notion, Teams, Sheets, webhooks, and more.</p>
+          <h3>Onboard clients automatically</h3>
+          <p>Create accounts, send briefs, and open projects across Slack, Notion, email, and billing.</p>
         </article>
         <article class="card">
-          <h3>Consolidate</h3>
-          <p>Normalize events into a clean, queryable stream for your org.</p>
+          <h3>State-of-the-art outreach</h3>
+          <p>Multi-channel sequences that draft, personalize, and route replies—no copy-paste.</p>
         </article>
         <article class="card">
-          <h3>Act</h3>
-          <p>Draft replies, route tasks, update records, and notify stakeholders.</p>
+          <h3>Insights from your team's signals</h3>
+          <p>Summarize metrics and conversations (Slack/email) to surface risks and assign a productivity health score.</p>
         </article>
         <article class="card">
           <h3>Prove it</h3>
-          <p>SOC-ready audit logs, human approvals, and full rollbacks.</p>
+          <p>SOC-ready audit logs, human approvals, and rollbacks. Immediate wins in week one.</p>
         </article>
       </div>
     </section>
@@ -97,44 +126,32 @@
     <section id="why" class="section">
       <h2>Why AXIVM is different</h2>
       <div class="features">
-        <article class="card"><h3>Immediate ROI</h3><p>We ship one agent that removes a real bottleneck in week 1. No platform tax—just results.</p></article>
-        <article class="card"><h3>Agent-in-the-middle</h3><p>Not another point integration. Our agent sits between tools, reasons over data, and takes action.</p></article>
-        <article class="card"><h3>Sovereign by design</h3><p>Bring your own keys, least-privilege scopes, full audit trail with rollbacks and approvals.</p></article>
+        <article class="card"><h3>Immediate ROI</h3><p>Ship one agent that removes a real bottleneck in week one—no platform tax.</p></article>
+        <article class="card"><h3>Agent-in-the-middle</h3><p>Our agent sits between tools, reasons over data, and acts.</p></article>
+        <article class="card"><h3>Sovereign by design</h3><p>Private, self-hosted or VPS—keep control of your data and hardware. Keep big tech at arm's length with AXIVM <strong>Citadel Sentinel</strong> nodes.</p></article>
         <article class="card"><h3>Templates that bend</h3><p>n8n under the hood—custom rules without vendor lock-in.</p></article>
       </div>
     </section>
 
     <section id="playbooks" class="section">
-      <h2>Playbooks you can deploy tonight</h2>
+      <h2>Deploy 500+ playbooks at the touch of a button.</h2>
+      <p class="lead">Sign into your services, answer a few questions, and let our agents triage and suggest workflows and integrations to create value immediately.</p>
       <div class="features">
-        <article class="card"><h3>Lead → Follow-Up → Friday Summary</h3><p>Capture from forms/email, send tailored follow-ups, and get a weekly outcomes brief.</p></article>
-        <article class="card"><h3>Shared Inbox Triage</h3><p>Tag, route, and escalate with SLA timers; keep humans in the loop with approvals.</p></article>
-        <article class="card"><h3>Intake → Notion/Sheets</h3><p>Summarize submissions, create tasks, and notify owners across Slack/Teams.</p></article>
-        <article class="card"><h3>Security Quick-Wins</h3><p>Ingest basic logs, flag anomalies, alert to Matrix/Slack with audit stamps.</p></article>
+        <article class="card"><h3>Sales & Growth</h3><p>Inbound capture → tailored follow-up → weekly pipeline brief.</p></article>
+        <article class="card"><h3>Ops & Support</h3><p>Shared inbox triage, SLA alerts, automatic updates to your source of truth.</p></article>
+        <article class="card"><h3>People & Productivity</h3><p>Digests, goals, sentiment, and health score for teams.</p></article>
+        <article class="card"><h3>Security & Compliance</h3><p>Log ingest, anomaly flags, approvals, and audit-stamped notifications.</p></article>
       </div>
-      <div class="cta" style="margin-top:16px">
-        <a class="btn primary" href="#contact">Book Free Audit</a>
-        <a class="btn ghost" href="#how">See How It Works</a>
+      <div class="cta cta-centered" style="margin-top:16px">
+        <a class="btn primary magnet" href="#how"><span>Start for Free</span></a>
+        <a class="btn ghost" href="#contact">Browse Playbooks</a>
       </div>
     </section>
 
     <section id="demo" class="section">
       <h2>See it in 90 seconds</h2>
       <div class="video-frame">
-        <!-- Option 1: Loom embed (replace VIDEO_ID) -->
-        <iframe src="https://www.loom.com/embed/VIDEO_ID"
-                title="AXIVM — How it works"
-                frameborder="0"
-                allow="autoplay; encrypted-media"
-                allowfullscreen></iframe>
-
-        <!-- Option 2: self-hosted MP4 (uncomment and remove iframe)
-        <video src="assets/axivm-demo.mp4" controls playsinline></video>
-        -->
-      </div>
-      <div class="cta" style="margin-top:12px">
-        <a class="btn primary" href="#how">Start Free Pilot</a>
-        <a class="btn ghost" href="#what">See What We Do</a>
+        <iframe src="https://www.loom.com/embed/VIDEO_ID" title="AXIVM — How it works" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       </div>
     </section>
 
