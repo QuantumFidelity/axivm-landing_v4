@@ -491,6 +491,103 @@ const AX_PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)')
   raf=requestAnimationFrame(tick);
 })();
 
+/* === KPI Count-Up after USER scroll + when band is really in-view; fade hero === */
+(() => {
+  const band = document.getElementById('kpi-band');
+  const hero = document.getElementById('hero');
+  if (!band || !hero) return;
+
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const counters = [...band.querySelectorAll('.count')];
+
+  let userScrolled = false;
+  const markScrolled = () => { userScrolled = true; window.removeEventListener('scroll', markScrolled); };
+  window.addEventListener('scroll', markScrolled, { passive:true });
+
+  const fmt = (n, decimals, format) => {
+    const fixed = n.toFixed(decimals);
+    if (format === 'comma'){
+      const [i,d] = fixed.split('.');
+      const head = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return d ? head + '.' + d : head;
+    }
+    return fixed;
+  };
+
+  function animateCount(el){
+    const end = parseFloat(el.dataset.end || '0');
+    const decimals = parseInt(el.dataset.decimals || '0', 10);
+    const suffix = el.dataset.suffix || '';
+    const format = el.dataset.format || 'plain';
+    const duration = 1100 + Math.min(1200, Math.abs(end) * 8);
+    if (RM){ el.textContent = fmt(end, decimals, format) + suffix; return; }
+
+    let start = null; const from = 0;
+    const ease = t => 1 - Math.pow(1 - t, 3); // easeOutCubic
+    function tick(ts){
+      if (!start) start = ts;
+      const p = Math.min(1, (ts - start) / duration);
+      const val = from + (end - from) * ease(p);
+      el.textContent = fmt(val, decimals, format) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  let played = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.target !== band) return;
+
+      // Only react after the user has actually scrolled
+      if (!userScrolled) return;
+
+      if (e.isIntersecting){
+        band.classList.add('reveal');
+        hero.classList.add('deemphasize');
+        if (!played){
+          counters.forEach(animateCount);
+          played = true;
+        }
+      } else {
+        hero.classList.remove('deemphasize');
+      }
+    });
+  }, {
+    // Require most of the band to be visible, and delay until it's lower in the viewport
+    threshold: 0.66,
+    rootMargin: "0px 0px -12% 0px"
+  });
+
+  io.observe(band);
+})();
+
+/* === CTA Glimmer: cursor-reactive highlight + micro-haptic === */
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const btns = document.querySelectorAll('.btn.glimmer');
+  if (!btns.length) return;
+
+  btns.forEach(btn => {
+    const set = (e) => {
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      btn.style.setProperty('--mx', `${x}px`);
+      btn.style.setProperty('--my', `${y}px`);
+    };
+    btn.addEventListener('mousemove', set, {passive:true});
+    btn.addEventListener('mouseenter', (e) => {
+      set(e);
+      if (!RM && 'vibrate' in navigator) { try{ navigator.vibrate(8); }catch{} }
+    }, {passive:true});
+    btn.addEventListener('mouseleave', () => {
+      btn.style.setProperty('--mx', `50%`);
+      btn.style.setProperty('--my', `50%`);
+    }, {passive:true});
+  });
+})();
+
 /* Magnetic CTAs (hero + nav) */
 (() => {
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
