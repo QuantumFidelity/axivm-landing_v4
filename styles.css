@@ -440,7 +440,7 @@ body {
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite: exclude; pointer-events:none; opacity:.72;
 }
-/* side gradient wings */
+/* Gradient wings */
 .hero-gradient{
   position:absolute; inset:0; pointer-events:none;
   background: linear-gradient(90deg, rgba(25,255,209,.18) 0%, rgba(255,46,99,.18) 100%);
@@ -448,6 +448,29 @@ body {
   -webkit-mask: radial-gradient(120% 70% at 50% 40%, #000 55%, transparent 80%);
           mask: radial-gradient(120% 70% at 50% 40%, #000 55%, transparent 80%);
 }
+
+/* Holo lattice */
+.hero-lattice{
+  position:absolute; inset:-8% -6%; pointer-events:none;
+  filter: blur(0.2px); opacity:.65;
+  -webkit-mask: radial-gradient(70% 55% at 50% 35%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 48%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%);
+          mask: radial-gradient(70% 55% at 50% 35%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 48%, rgba(0,0,0,1) 65%, rgba(0,0,0,1) 100%);
+}
+.lattice-svg{ position:absolute; inset:0; opacity:.35; mix-blend-mode:screen; }
+.lattice-dots{
+  position:absolute; inset:0; mix-blend-mode:screen; opacity:.25;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(25,255,209,.35), transparent 70%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,46,99,.35), transparent 70%),
+    radial-gradient(1px 1px at 45% 75%, rgba(138,125,255,.28), transparent 70%);
+  background-repeat:no-repeat;
+}
+@media (prefers-reduced-motion: no-preference){
+  .lattice-svg{ animation: latticeDrift 18s ease-in-out infinite alternate; }
+  .lattice-dots{ animation: dotDrift 22s ease-in-out infinite alternate; }
+}
+@keyframes latticeDrift{ from{ transform: translateX(-6px) translateY(-3px) } to{ transform: translateX(8px) translateY(4px) } }
+@keyframes dotDrift{     from{ transform: translateX( 4px) translateY(-4px)} to{ transform: translateX(-6px) translateY(6px)} }
 .hero-sweep{
   position:absolute; inset:-20% -10%;
   background: linear-gradient(70deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.25) 50%, rgba(255,255,255,0) 60%);
@@ -480,6 +503,17 @@ body {
 .kpis li{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text); }
 .kpis li strong{ font-size:16px; font-weight:800; }
 .kpis li span{ color:var(--muted); font-size:13px; }
+
+/* Cinematic Panels */
+.panel{ position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:clamp(48px,12vh,160px) 24px; text-align:center; }
+.panel-big{ font-size:clamp(36px,8vw,96px); line-height:.98; letter-spacing:-.02em; font-weight:900; margin:0 0 12px; }
+.panel-sub{ color:var(--muted); font-size:clamp(16px,2vw,20px); margin:0 auto; max-width:860px; }
+.grad{ background:linear-gradient(90deg, var(--trace-aqua), var(--trace-pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.strike{ position:relative; display:inline-block; }
+.strike::after{ content:""; position:absolute; left:-2%; right:-2%; top:55%; height:.12em; border-radius:2px; background:linear-gradient(90deg, rgba(255,46,99,.85), rgba(25,255,209,.85)); transform:rotate(-6deg); }
+#intro-a{ background: radial-gradient(60% 60% at 50% 20%, rgba(25,255,209,.10), transparent 60%); }
+#intro-b{ background: radial-gradient(60% 60% at 50% 20%, rgba(255,46,99,.08), transparent 60%); }
+#intro-c{ background: radial-gradient(60% 60% at 50% 20%, rgba(138,125,255,.10), transparent 60%); }
 
 /* Sections & cards */
 .section{ position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:clamp(24px,5vw,56px) clamp(16px,4vw,32px); }
