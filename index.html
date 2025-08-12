@@ -18,7 +18,7 @@
   <main class="site">
     <!-- Background animation -->
     <div class="bg-wrap" aria-hidden="true">
-      <svg class="mb-svg" viewBox="0 0 800 560" role="img" aria-label="AXIVM connecting your apps like a motherboard">
+      <svg class="mb-svg iso" viewBox="0 0 800 560" role="img" aria-label="AXIVM connecting your apps like a motherboard">
         <defs>
           <!-- PCB grid -->
           <pattern id="iso-grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="skewY(-30)">
@@ -31,6 +31,47 @@
             <stop offset="50%" stop-color="var(--trace-pink)" />
             <stop offset="100%" stop-color="var(--trace-cyan)" />
           </linearGradient>
+
+          <!-- Inner glow for glass edge -->
+          <filter id="inner-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/>
+            <feOffset dx="0" dy="0" result="o"/>
+            <feComposite in="o" in2="b" operator="arithmetic" k2="-1" k3="1" result="inner"/>
+            <feColorMatrix in="inner" type="matrix"
+              values="0 0 0 0 1
+                      0 0 0 0 1
+                      0 0 0 0 1
+                      0 0 0 .35 0" result="g"/>
+            <feMerge>
+              <feMergeNode in="g"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+
+          <!-- Beveled stroke for glass -->
+          <linearGradient id="glass-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"  stop-color="rgba(255,255,255,.55)"/>
+            <stop offset="50%" stop-color="rgba(255,255,255,.18)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,.45)"/>
+          </linearGradient>
+
+          <!-- Moving glare bar -->
+          <linearGradient id="glare-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="30%" stop-color="rgba(255,255,255,.35)"/>
+            <stop offset="70%" stop-color="rgba(255,255,255,.08)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </linearGradient>
+
+          <!-- Soft blur for shadows -->
+          <filter id="blur-6"><feGaussianBlur stdDeviation="6"/></filter>
+
+          <!-- Via gradient (if not present) -->
+          <radialGradient id="via-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#0a1416"/>
+            <stop offset="55%" stop-color="#1b2e31"/>
+            <stop offset="100%" stop-color="#071013"/>
+          </radialGradient>
         </defs>
 
         <!-- Motherboard base -->
@@ -83,6 +124,7 @@
           <path class="trace" data-from="slack" data-to="gmail" data-color="var(--trace-aqua)"></path>
           <path class="trace" data-from="notion" data-to="teams" data-color="var(--trace-pink)"></path>
         </g>
+        <g id="decals"></g>
       </svg>
       <!-- vignette to keep hero text readable -->
       <div class="vignette"></div>
@@ -95,7 +137,7 @@
         <span class="line-2 accent">Free 14-day pilot.</span>
       </h1>
       <p class="sub">
-        AXIVM turns manual processes into autonomous systems you own—secure, auditable, measurable.
+        AXIVM connects your tools, learns your workflow, and <em>does the work</em>—secure, auditable, measurable.
       </p>
       
       <div class="trust-pill">✓ Trusted by security-first teams.</div>
@@ -104,6 +146,11 @@
         <a class="btn primary" href="#contact">Book Free Audit</a>
         <a class="btn ghost" href="#how" id="see-how">See How It Works</a>
       </div>
+
+      <!-- Guarantee strip (conversion) -->
+      <p class="guarantee">
+        <span>14-day free pilot</span> · <span>≤ 1-day setup</span> · <span>No credit card</span> · <span>Cancel anytime</span>
+      </p>
     </section>
 
     <!-- WHAT WE DO -->
@@ -147,9 +194,56 @@
       </div>
     </section>
 
+    <section id="why" class="section">
+      <h2>Why AXIVM is different</h2>
+      <div class="features">
+        <article class="card"><h3>Immediate ROI</h3><p>We ship one agent that removes a real bottleneck in week 1. No platform tax—just results.</p></article>
+        <article class="card"><h3>Agent-in-the-middle</h3><p>Not another point integration. Our agent sits between tools, reasons over data, and takes action.</p></article>
+        <article class="card"><h3>Sovereign by design</h3><p>Bring your own keys, least-privilege scopes, full audit trail with rollbacks and approvals.</p></article>
+        <article class="card"><h3>Templates that bend</h3><p>n8n under the hood—custom rules without vendor lock-in.</p></article>
+      </div>
+    </section>
+
+    <section id="playbooks" class="section">
+      <h2>Playbooks you can deploy tonight</h2>
+      <div class="features">
+        <article class="card"><h3>Lead → Follow-Up → Friday Summary</h3><p>Capture from forms/email, send tailored follow-ups, and get a weekly outcomes brief.</p></article>
+        <article class="card"><h3>Shared Inbox Triage</h3><p>Tag, route, and escalate with SLA timers; keep humans in the loop with approvals.</p></article>
+        <article class="card"><h3>Intake → Notion/Sheets</h3><p>Summarize submissions, create tasks, and notify owners across Slack/Teams.</p></article>
+        <article class="card"><h3>Security Quick-Wins</h3><p>Ingest basic logs, flag anomalies, alert to Matrix/Slack with audit stamps.</p></article>
+      </div>
+      <div class="cta" style="margin-top:16px">
+        <a class="btn primary" href="#contact">Book Free Audit</a>
+        <a class="btn ghost" href="#how">See How It Works</a>
+      </div>
+    </section>
+
+    <section id="demo" class="section">
+      <h2>See it in 90 seconds</h2>
+      <div class="video-frame">
+        <!-- Option 1: Loom embed (replace VIDEO_ID) -->
+        <iframe src="https://www.loom.com/embed/VIDEO_ID"
+                title="AXIVM — How it works"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen></iframe>
+
+        <!-- Option 2: self-hosted MP4 (uncomment and remove iframe)
+        <video src="assets/axivm-demo.mp4" controls playsinline></video>
+        -->
+      </div>
+      <div class="cta" style="margin-top:12px">
+        <a class="btn primary" href="#how">Start Free Pilot</a>
+        <a class="btn ghost" href="#what">See What We Do</a>
+      </div>
+    </section>
+
     <!-- Extra scroll space to showcase progressive lighting -->
     <section class="spacer"></section>
   </main>
+
+  <!-- Sticky CTA pill -->
+  <a href="#how" class="sticky-pilot" id="stickyPilot">Start Free Pilot</a>
 
   <script src="script.js" defer></script>
 </body>

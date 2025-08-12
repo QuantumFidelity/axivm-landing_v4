@@ -200,6 +200,102 @@ body {
 }
 .steps .cta.row { margin-top: 18px; }
 
+/* ===== Isometric polish for motherboard ===== */
+.mb-svg.iso{
+  transform-origin: 50% 40%;
+  transform: perspective(1400px) rotateX(55deg) rotateZ(-45deg) scale(1.18);
+  will-change: transform, filter;
+  image-rendering: -webkit-optimize-contrast;
+  shape-rendering: geometricPrecision;
+  filter: drop-shadow(0 30px 80px rgba(0,0,0,.55));
+}
+.trace { filter: drop-shadow(0 0 10px rgba(0,255,220,.12)); }
+
+/* subtle grain + light blooms */
+.bg-wrap::after{
+  content:"";
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(1200px 800px at 10% -10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(1000px 700px at 110% 120%, rgba(255,255,255,.04), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 2px);
+  mix-blend-mode: overlay;
+  opacity:.35;
+}
+
+/* mobile: flatten perspective for readability */
+@media (max-width: 720px){
+  .mb-svg.iso{ transform:none; filter:none; }
+}
+
+/* ===== Hero accents & guarantee ===== */
+.headline { text-shadow: 0 0 28px rgba(0,255,255,.15); }
+.headline .accent{
+  display:block;
+  background: linear-gradient(90deg, var(--trace-pink, #ff2e63), var(--trace-aqua, #19ffd1));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+.guarantee{
+  margin-top:12px; color:var(--muted, #a1a1aa); font-size:14px;
+}
+.guarantee span{
+  padding:4px 8px; border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  margin-right:6px;
+}
+
+/* ===== Sticky "Start Free Pilot" pill ===== */
+.sticky-pilot{
+  position: fixed; right:16px; bottom:16px; z-index: 30;
+  padding:10px 14px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--trace-aqua, #19ffd1), var(--trace-pink, #ff2e63));
+  color:#081015; font-weight:800;
+  box-shadow:0 20px 40px rgba(0,0,0,.35);
+  opacity:0; transform: translateY(12px); transition: .25s ease;
+}
+.sticky-pilot.show{ opacity:1; transform: translateY(0); }
+
+/* ===== Video frame ===== */
+.video-frame{
+  position:relative; width:100%; max-width:980px; aspect-ratio:16/9;
+  border-radius:18px; overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.02);
+  margin-top:12px;
+}
+.video-frame iframe, .video-frame video{ position:absolute; inset:0; width:100%; height:100%; }
+
+/* === CPU glass cover === */
+.cpu-glass {
+  fill: rgba(255,255,255,.06);
+  stroke: url(#glass-stroke);
+  stroke-width: 1.5;
+  filter: url(#inner-glow);
+  backdrop-filter: blur(1px);
+}
+.cpu-glass-bezel {
+  fill: none;
+  stroke: rgba(0,0,0,.35);
+  stroke-width: 1;
+}
+.cpu-glare { fill: url(#glare-grad); opacity: .35; }
+
+/* === SMD components & marks === */
+.smd-body { fill:#1a1f23; stroke:#2f353b; stroke-width:1; }
+.smd-pad  { fill:#d7d9db; }
+.silk     { fill:none; stroke:rgba(255,255,255,.35); stroke-width:.8; opacity:.5; }
+.comp-shadow { fill:rgba(0,0,0,.45); filter:url(#blur-6); }
+
+.mount-hole { fill:#0a0c0e; stroke:#22272b; stroke-width:2; }
+.fiducial   { fill:#e8ecef; opacity:.8; }
+.testpad    { fill:#a5b4bd; opacity:.7; }
+
+/* PCB vias */
+.via { fill:url(#via-grad); opacity:.9; }
+
 /* Reduced motion: no line drawing animation, show traces fully lit */
 @media (prefers-reduced-motion: reduce) {
   .trace { transition: none !important; }
