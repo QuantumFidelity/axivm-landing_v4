@@ -101,13 +101,30 @@ body {
 }
 
 /* Headline drama */
-.headline{ font-weight:900; font-size:clamp(44px,7.2vw,88px); letter-spacing:-.02em; line-height:1.02; text-shadow:0 0 32px rgba(0,255,255,.12); }
+.headline{ 
+  font-weight:900; 
+  font-size:clamp(44px,7.2vw,88px); 
+  letter-spacing:-.02em; 
+  line-height:1.02; 
+  text-shadow:0 0 32px rgba(0,255,255,.12); 
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+}
+
+.headline .line-1,
+.headline .line-2,
+.headline .line-3 {
+  display: block;
+}
+
 .headline .accent {
   display: block;
   background: linear-gradient(90deg, var(--trace-pink), var(--trace-aqua));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  margin-top: 0.05em;
 }
 
 .sub {
@@ -233,6 +250,8 @@ body {
   background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.08);
   margin-right:6px;
+  display: inline-block;
+  margin-bottom: 4px;
 }
 
 /* ===== Sticky "Start Free Pilot" pill ===== */
@@ -449,6 +468,14 @@ body {
     font-size: clamp(28px, 6vw, 36px);
   }
   
+  .headline {
+    gap: 0.05em;
+  }
+  
+  .headline .accent {
+    margin-top: 0.1em;
+  }
+  
   .sub {
     font-size: clamp(15px, 3.5vw, 16px);
   }
@@ -472,6 +499,35 @@ body {
     width: 100%;
     max-width: 300px;
     text-align: center;
+  }
+  
+  /* Fix guarantee badges spacing on mobile */
+  .guarantee {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  
+  .guarantee span {
+    margin-right: 4px;
+    margin-bottom: 6px;
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .guarantee {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  
+  .guarantee span {
+    margin-right: 3px;
+    margin-bottom: 8px;
+    padding: 2px 5px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 }
 
