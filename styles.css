@@ -463,7 +463,7 @@ body {
 .nav-links a{ color:var(--muted); text-decoration:none; padding:8px 6px; border-radius:10px; }
 .nav-links a:hover{ background:rgba(255,255,255,.05); color:var(--text); }
 .nav-ctas{ display:flex; gap:10px; margin-left:12px; }
-.btn.sm{ padding:8px 12px; border-radius:12px; font-weight:700; font-size:14px; }
+.btn.sm{ padding:8px 12px; border-radius:12px; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; }
 .nav-toggle{ display:none; background:none; border:0; width:38px; height:34px; position:relative; border-radius:8px; }
 .nav-toggle span{ position:absolute; left:8px; right:8px; height:2px; background:var(--text); transform-origin: center; }
 .nav-toggle span:nth-child(1){ top:10px; }
