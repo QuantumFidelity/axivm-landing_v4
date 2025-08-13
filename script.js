@@ -127,6 +127,33 @@ const AX_PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)')
   onScroll();
 })();
 
+/* === Back to Top Button === */
+(() => {
+  const backToTopBtn = document.getElementById('backToTop');
+  if (!backToTopBtn) return;
+
+  // Show/hide button based on scroll position
+  function onScroll() {
+    if (window.scrollY > 800) {
+      backToTopBtn.classList.add('show');
+    } else {
+      backToTopBtn.classList.remove('show');
+    }
+  }
+
+  // Smooth scroll to top when clicked
+  backToTopBtn.addEventListener('click', () => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReduced ? 'auto' : 'smooth'
+    });
+  });
+
+  window.addEventListener('scroll', onScroll, {passive: true});
+  onScroll(); // Check initial state
+})();
+
 /* Sticky nav + mobile toggle */
 (() => {
   const nav = document.querySelector('.topnav');
