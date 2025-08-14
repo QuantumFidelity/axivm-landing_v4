@@ -359,7 +359,7 @@ body {
   max-width:1100px; 
   margin:0 auto; 
   padding:clamp(24px,5vw,48px); 
-  padding-top:clamp(96px,16vh,160px); 
+  padding-top:clamp(24px,4vh,48px); 
 }
 .hero-inner{
   position:relative; 
@@ -572,7 +572,7 @@ body {
 .vignette{ position:absolute; inset:0; background: radial-gradient(60% 55% at 28% 30%, rgba(0,0,0,.8), transparent 60%), radial-gradient(100% 80% at 110% -10%, rgba(255,255,255,.02), transparent 60%); }
 
 /* ===== Hero ===== */
-.hero{ position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:clamp(24px,5vw,48px); padding-top:clamp(48px,10vh,120px); }
+.hero{ position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:clamp(24px,5vw,48px); padding-top:clamp(24px,4vh,48px); }
 .hero-glass{
   position:relative; max-width:980px; margin:0 auto; border-radius:22px;
   padding:clamp(18px,3vw,28px);
